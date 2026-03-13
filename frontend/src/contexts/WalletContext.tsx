@@ -2,12 +2,16 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { ethers } from 'ethers';
+import { detectWallets, getPrimaryWallet } from '../utils/walletDetection';
 
 interface WalletContextType {
   account: string | null;
   provider: ethers.BrowserProvider | null;
   signer: ethers.JsonRpcSigner | null;
   isConnected: boolean;
+  isConnecting: boolean;
+  connectionRequested: boolean;
+  manuallyDisconnected: boolean;
   connectWallet: () => Promise<void>;
   disconnectWallet: () => void;
   error: string | null;
@@ -32,6 +36,9 @@ export const WalletProvider: React.FC<WalletProviderProps> = ({ children }) => {
   const [provider, setProvider] = useState<ethers.BrowserProvider | null>(null);
   const [signer, setSigner] = useState<ethers.JsonRpcSigner | null>(null);
   const [isConnected, setIsConnected] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [connectionRequested, setConnectionRequested] = useState(false);
+  const [manuallyDisconnected, setManuallyDisconnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -39,29 +46,82 @@ export const WalletProvider: React.FC<WalletProviderProps> = ({ children }) => {
     setupEventListeners();
   }, []);
 
-  const checkConnection = async () => {
-    if (typeof window !== 'undefined' && window.ethereum) {
-      try {
-        const provider = new ethers.BrowserProvider(window.ethereum);
-        const accounts = await provider.listAccounts();
-        
-        if (accounts.length > 0) {
-          const signer = await provider.getSigner();
-          setAccount(accounts[0].address);
-          setProvider(provider);
-          setSigner(signer);
-          setIsConnected(true);
-        }
-      } catch (error) {
-        console.error('Error checking wallet connection:', error);
+  // Function to clear pending MetaMask requests
+  const clearPendingRequests = async () => {
+    try {
+      if (typeof window !== 'undefined' && (window as any).ethereum && (window as any).ethereum.request) {
+        // Try to clear pending permissions
+        await (window as any).ethereum.request({
+          method: 'wallet_requestPermissions',
+          params: [{ eth_accounts: {} }]
+        });
       }
+    } catch (error) {
+      console.error('Error clearing pending requests:', error);
+    }
+  };
+
+  const checkConnection = async () => {
+    // If user manually disconnected, don't auto-reconnect
+    if (manuallyDisconnected) {
+      console.log('User manually disconnected, skipping auto-connection');
+      return;
+    }
+
+    if (typeof window === 'undefined') {
+      console.log('Window not available');
+      return;
+    }
+
+    const wallets = detectWallets();
+    console.log('Detected wallets:', wallets);
+
+    if (wallets.length === 0) {
+      console.log('No wallets detected');
+      return;
+    }
+
+    const primaryWallet = getPrimaryWallet();
+    if (!primaryWallet) {
+      console.log('No primary wallet found');
+      return;
+    }
+
+    console.log('Using primary wallet:', primaryWallet.name);
+
+    try {
+      const provider = new ethers.BrowserProvider(primaryWallet.provider);
+      console.log('Provider created:', provider);
+
+      // Check for already connected accounts (don't request new ones)
+      const accounts = await provider.send('eth_accounts', []);
+      console.log('Connected accounts:', accounts);
+
+      if (!accounts || accounts.length === 0) {
+        console.log('No accounts currently connected');
+        return;
+      }
+
+      const signer = await provider.getSigner();
+      const address = await signer.getAddress();
+
+      console.log('Connected to address:', address);
+
+      setAccount(address);
+      setProvider(provider);
+      setSigner(signer);
+      setIsConnected(true);
+      setError(null);
+    } catch (error: any) {
+      console.error('Error checking connection:', error);
+      setError(error.message || 'Failed to check wallet connection');
     }
   };
 
   const setupEventListeners = () => {
-    if (typeof window !== 'undefined' && window.ethereum) {
-      window.ethereum.on('accountsChanged', handleAccountsChanged);
-      window.ethereum.on('chainChanged', handleChainChanged);
+    if (typeof window !== 'undefined' && (window as any).ethereum) {
+      (window as any).ethereum.on('accountsChanged', handleAccountsChanged);
+      (window as any).ethereum.on('chainChanged', handleChainChanged);
     }
   };
 
@@ -78,35 +138,116 @@ export const WalletProvider: React.FC<WalletProviderProps> = ({ children }) => {
   };
 
   const connectWallet = async () => {
+    // Prevent multiple connection requests
+    if (connectionRequested) {
+      setError('Already requested for wallet connection. Please check your Wallet.');
+      return;
+    }
+
+    setIsConnecting(true);
+    setConnectionRequested(true);
+    setError(null);
+    setManuallyDisconnected(false); // Reset manual disconnect flag
+
     try {
-      setError(null);
-      
-      if (!window.ethereum) {
-        setError('MetaMask is not installed. Please install MetaMask to continue.');
+      const wallets = detectWallets();
+      if (wallets.length === 0) {
+        setError('No wallet detected. Please install MetaMask or another Web3 wallet.');
+        setConnectionRequested(false);
         return;
       }
 
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      await provider.send('eth_requestAccounts', []);
+      const primaryWallet = getPrimaryWallet();
+      if (!primaryWallet) {
+        setError('No wallet available');
+        setConnectionRequested(false);
+        return;
+      }
+
+      console.log('Using primary wallet:', primaryWallet.name);
+
+      const provider = new ethers.BrowserProvider(primaryWallet.provider);
+      console.log('Provider created:', provider);
+
+      // Request accounts
+      const accounts = await provider.send('eth_requestAccounts', []);
+      console.log('Accounts received:', accounts);
+
+      if (!accounts || accounts.length === 0) {
+        setError('No accounts found. Please make sure your wallet is unlocked.');
+        setConnectionRequested(false);
+        return;
+      }
+
       const signer = await provider.getSigner();
       const address = await signer.getAddress();
+
+      console.log('Connected to address:', address);
 
       setAccount(address);
       setProvider(provider);
       setSigner(signer);
       setIsConnected(true);
+      setConnectionRequested(false);
+      setManuallyDisconnected(false);
+      setError(null);
     } catch (error: any) {
       console.error('Error connecting wallet:', error);
-      setError(error.message || 'Failed to connect wallet');
+      
+      // Handle user rejection specifically
+      if (error.code === 4001 || error.message?.includes('User rejected the request')) {
+        setError('Wallet connection was cancelled. Please try again if you want to connect.');
+      } else {
+        setError(error.message || 'Failed to connect wallet');
+      }
+      
+      setConnectionRequested(false);
+    } finally {
+      setIsConnecting(false);
     }
   };
 
-  const disconnectWallet = () => {
-    setAccount(null);
-    setProvider(null);
-    setSigner(null);
-    setIsConnected(false);
-    setError(null);
+  const disconnectWallet = async () => {
+    try {
+      // Clear local state first (this is the most important part)
+      setAccount(null);
+      setProvider(null);
+      setSigner(null);
+      setIsConnected(false);
+      setIsConnecting(false);
+      setConnectionRequested(false);
+      setManuallyDisconnected(true);
+      setError(null);
+
+      // Optional: Try to revoke MetaMask permissions (but don't force it)
+      if (typeof window !== 'undefined' && window.ethereum) {
+        try {
+          // Only try to revoke permissions, don't request new ones
+          await window.ethereum.request({
+            method: 'wallet_revokePermissions',
+            params: [
+              {
+                eth_accounts: {}
+              }
+            ]
+          });
+          console.log('Revoked MetaMask permissions');
+        } catch (revokeError) {
+          console.log('Could not revoke permissions (this is normal):', revokeError);
+        }
+      }
+    } catch (error) {
+      console.error('Error during disconnect:', error);
+      // Still clear local state even if MetaMask disconnect fails
+      setAccount(null);
+      setProvider(null);
+      setSigner(null);
+      setIsConnected(false);
+      setIsConnecting(false);
+      setConnectionRequested(false);
+      setManuallyDisconnected(true);
+      setError(null);
+    }
   };
 
   return (
@@ -116,6 +257,9 @@ export const WalletProvider: React.FC<WalletProviderProps> = ({ children }) => {
         provider,
         signer,
         isConnected,
+        isConnecting,
+        connectionRequested,
+        manuallyDisconnected,
         connectWallet,
         disconnectWallet,
         error,
@@ -130,5 +274,6 @@ export const WalletProvider: React.FC<WalletProviderProps> = ({ children }) => {
 declare global {
   interface Window {
     ethereum?: any;
+    web3?: any;
   }
 }

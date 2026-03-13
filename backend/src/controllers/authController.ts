@@ -4,7 +4,7 @@ import { generateToken, AuthRequest } from '../middleware/auth';
 
 export const register = async (req: Request, res: Response) => {
   try {
-    const { name, email, password, wallet_address } = req.body;
+    const { name, email, password, wallet_address, role = 'user' } = req.body;
 
     // Validate input
     if (!name || !email || !password) {
@@ -22,7 +22,8 @@ export const register = async (req: Request, res: Response) => {
       name,
       email,
       password,
-      wallet_address
+      wallet_address,
+      role
     });
 
     // Generate JWT token

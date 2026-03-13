@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { Navigation } from '@/components/layout/Navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { useWallet } from '@/contexts/WalletContext';
 import { TrendingUp, Building, Coins, Rocket, ArrowRight, Shield, Users, BarChart3 } from 'lucide-react';
 
 export default function Home() {

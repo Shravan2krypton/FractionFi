@@ -26,19 +26,37 @@ export default function AssetDetails() {
   const params = useParams();
   const router = useRouter();
   const { user } = useAuth();
-  const { isConnected, account } = useWallet();
+  const { isConnected, account, signer } = useWallet();
   
   const [asset, setAsset] = useState<Asset | null>(null);
   const [loading, setLoading] = useState(true);
   const [purchaseAmount, setPurchaseAmount] = useState('');
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [error, setError] = useState('');
+  const [walletBalance, setWalletBalance] = useState<string>('0');
 
   useEffect(() => {
     if (params.id) {
       fetchAsset(params.id as string);
     }
   }, [params.id]);
+
+  useEffect(() => {
+    if (isConnected && signer) {
+      fetchWalletBalance();
+    }
+  }, [isConnected, signer]);
+
+  const fetchWalletBalance = async () => {
+    try {
+      if (!signer) return;
+      const balance = await signer.provider.getBalance(account || await signer.getAddress());
+      const balanceInEth = parseFloat(balance.toString()) / 1e18;
+      setWalletBalance(balanceInEth.toFixed(4));
+    } catch (error) {
+      console.error('Error fetching balance:', error);
+    }
+  };
 
   const fetchAsset = async (id: string) => {
     try {
@@ -83,6 +101,58 @@ export default function AssetDetails() {
     setError('');
 
     try {
+      // Use blockchain contract for purchase
+      const { getContract, mockContract } = await import('@/utils/contract');
+      
+      if (!signer) {
+        throw new Error('Wallet not connected');
+      }
+      
+      // Check wallet balance before proceeding
+      const balance = await signer.provider.getBalance(account || await signer.getAddress());
+      const balanceInEth = parseFloat(balance.toString()) / 1e18;
+      
+      if (balanceInEth === 0) {
+        throw new Error('Your wallet has no ETH. Please add funds to make purchases.');
+      }
+      
+      let contract;
+      try {
+        contract = getContract(signer);
+      } catch (contractError) {
+        console.log('Using mock contract - real contract not configured:', contractError);
+        contract = mockContract;
+      }
+      
+      if (!contract) {
+        throw new Error('Contract not available');
+      }
+      
+      // Calculate total cost
+      const tokenPrice = asset?.token_price || 1000; // Fallback price
+      const totalCost = parseInt(purchaseAmount) * tokenPrice;
+      
+      // Execute blockchain transaction
+      let tx;
+      if (contract === mockContract) {
+        // Mock contract expects different parameters
+        tx = await (contract as any).buyTokens(
+          parseInt(params.id as string),
+          parseInt(purchaseAmount),
+          totalCost.toString()
+        );
+      } else {
+        // Real contract with value object
+        tx = await (contract as any).buyTokens(
+          parseInt(params.id as string),
+          parseInt(purchaseAmount),
+          { value: totalCost.toString() }
+        );
+      }
+      
+      console.log('Transaction sent:', tx.hash);
+      
+      // Also record in backend for tracking
       const response = await apiFetch('/api/investments/purchase', {
         method: 'POST',
         headers: {
@@ -92,6 +162,8 @@ export default function AssetDetails() {
           asset_id: asset?.id,
           token_amount: parseInt(purchaseAmount),
           wallet_address: account,
+          transaction_hash: tx.hash,
+          total_amount: totalCost,
         }),
       });
 
@@ -107,8 +179,19 @@ export default function AssetDetails() {
       
       // Show success message
       alert('Purchase successful! Tokens will be transferred to your wallet.');
-    } catch (error) {
-      setError(error instanceof Error ? error.message : 'Purchase failed');
+    } catch (error: any) {
+      console.error('Purchase error:', error);
+      
+      // Handle specific error types
+      if (error.code === 'INSUFFICIENT_FUNDS') {
+        setError('Insufficient funds. Please add ETH to your wallet to complete this purchase.');
+      } else if (error.message?.includes('insufficient funds')) {
+        setError('Insufficient funds. Please add ETH to your wallet to complete this purchase.');
+      } else if (error.message?.includes('User rejected')) {
+        setError('Transaction was cancelled. Please try again.');
+      } else {
+        setError(error instanceof Error ? error.message : 'Purchase failed. Please try again.');
+      }
     } finally {
       setIsPurchasing(false);
     }
@@ -324,6 +407,20 @@ export default function AssetDetails() {
               
               {user && isConnected && (
                 <>
+                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium text-gray-700">Your Wallet Balance:</span>
+                      <span className={`text-sm font-bold ${parseFloat(walletBalance) === 0 ? 'text-red-600' : 'text-green-600'}`}>
+                        {walletBalance} ETH
+                      </span>
+                    </div>
+                    {parseFloat(walletBalance) === 0 && (
+                      <p className="text-xs text-red-600 mt-2">
+                        ⚠️ Your wallet has no ETH. Please add funds to make purchases.
+                      </p>
+                    )}
+                  </div>
+                  
                   <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Number of Tokens

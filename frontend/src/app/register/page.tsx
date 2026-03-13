@@ -31,24 +31,48 @@ export default function Register() {
   };
 
   const validateForm = () => {
-    if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
-      setError('All fields are required');
+    // Name validation
+    if (!formData.name || formData.name.trim().length < 2) {
+      setError('Name must be at least 2 characters long');
       return false;
     }
 
-    if (formData.password.length < 8) {
+    if (formData.name.length > 50) {
+      setError('Name must be less than 50 characters');
+      return false;
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setError('Please enter a valid email address');
+      return false;
+    }
+
+    // Password validation
+    if (!formData.password || formData.password.length < 8) {
       setError('Password must be at least 8 characters long');
+      return false;
+    }
+
+    if (formData.password.length > 128) {
+      setError('Password must be less than 128 characters');
+      return false;
+    }
+
+    // Password strength validation
+    const hasUpperCase = /[A-Z]/.test(formData.password);
+    const hasLowerCase = /[a-z]/.test(formData.password);
+    const hasNumbers = /\d/.test(formData.password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(formData.password);
+
+    if (!hasUpperCase || !hasLowerCase || !hasNumbers) {
+      setError('Password must contain uppercase, lowercase, and numbers');
       return false;
     }
 
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
-      return false;
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
-      setError('Please enter a valid email address');
       return false;
     }
 

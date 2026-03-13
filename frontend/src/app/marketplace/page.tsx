@@ -1,9 +1,15 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Navigation } from '@/components/layout/Navigation';
-import { Building, Coins, Rocket, Filter, Search, TrendingUp, Eye } from 'lucide-react';
+import { Building, Coins, Rocket, TrendingUp, Eye, Star, ArrowUpRight, Filter, Search } from 'lucide-react';
 import { apiFetch } from '@/utils/api';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
+import { Badge } from '@/components/ui/Badge';
+import { SearchInput } from '@/components/ui/SearchInput';
+import { AdvancedFilters, FilterGroup } from '@/components/ui/AdvancedFilters';
+import { cn } from '@/lib/utils';
 
 interface Asset {
   id: number;
@@ -25,14 +31,13 @@ export default function Marketplace() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedType, setSelectedType] = useState<string>('all');
+  const [priceRange, setPriceRange] = useState({ min: 0, max: 1000000 });
+  const [sortBy, setSortBy] = useState('roi_desc');
+  const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
     fetchAssets();
   }, []);
-
-  useEffect(() => {
-    filterAssets();
-  }, [assets, searchTerm, selectedType]);
 
   const fetchAssets = async () => {
     try {
@@ -46,35 +51,135 @@ export default function Marketplace() {
     }
   };
 
-  const filterAssets = () => {
-    let filtered = assets;
+  // Filter and sort assets
+  const processedAssets = useMemo(() => {
+    let filtered = assets.filter(asset => {
+      const matchesSearch = asset.name.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesType = selectedType === 'all' || asset.asset_type === selectedType;
+      const matchesPrice = asset.token_price >= priceRange.min && asset.token_price <= priceRange.max;
+      return matchesSearch && matchesType && matchesPrice;
+    });
 
-    // Filter by type
-    if (selectedType !== 'all') {
-      filtered = filtered.filter(asset => asset.asset_type === selectedType);
-    }
-
-    // Filter by search term
-    if (searchTerm) {
-      filtered = filtered.filter(asset =>
-        asset.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        asset.description?.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    setFilteredAssets(filtered);
-  };
+    // Sort assets
+    return filtered.sort((a, b) => {
+      switch (sortBy) {
+        case 'price_asc':
+          return a.token_price - b.token_price;
+        case 'price_desc':
+          return b.token_price - a.token_price;
+        case 'roi_desc':
+          return (b.roi_estimate || 0) - (a.roi_estimate || 0);
+        case 'name_asc':
+          return a.name.localeCompare(b.name);
+        default:
+          return 0;
+      }
+    });
+  }, [assets, searchTerm, selectedType, priceRange, sortBy]);
 
   const getAssetIcon = (type: string) => {
     switch (type) {
       case 'real_estate':
-        return <Building className="h-6 w-6" />;
+        return <Building className="h-5 w-5" />;
       case 'gold':
-        return <Coins className="h-6 w-6" />;
+        return <Coins className="h-5 w-5" />;
       case 'startup':
-        return <Rocket className="h-6 w-6" />;
+        return <Rocket className="h-5 w-5" />;
       default:
-        return <TrendingUp className="h-6 w-6" />;
+        return <TrendingUp className="h-5 w-5" />;
+    }
+  };
+
+  // Generate search suggestions
+  const searchSuggestions = useMemo(() => {
+    const suggestions = assets.slice(0, 10).map(asset => ({
+      id: asset.id.toString(),
+      text: asset.name,
+      type: 'asset' as const,
+      category: asset.asset_type.replace('_', ' '),
+      icon: getAssetIcon(asset.asset_type)
+    }));
+    
+    // Add popular searches
+    const popularSearches = [
+      { id: 'popular-1', text: 'Real Estate', type: 'popular' as const, category: 'Asset Type' },
+      { id: 'popular-2', text: 'Gold Investment', type: 'popular' as const, category: 'Asset Type' },
+      { id: 'popular-3', text: 'Tech Startups', type: 'popular' as const, category: 'Asset Type' },
+    ];
+    
+    return [...popularSearches, ...suggestions];
+  }, [assets]);
+
+  // Filter configuration for advanced filters
+  const filterGroups: FilterGroup[] = [
+    {
+      id: 'type',
+      label: 'Asset Type',
+      type: 'select',
+      options: [
+        { value: 'all', label: 'All Types' },
+        { value: 'real_estate', label: 'Real Estate' },
+        { value: 'gold', label: 'Gold & Precious Metals' },
+        { value: 'startup', label: 'Startups & Tech' },
+      ],
+      value: selectedType,
+      placeholder: 'Select asset type'
+    },
+    {
+      id: 'price',
+      label: 'Price Range',
+      type: 'range',
+      min: 0,
+      max: 1000000,
+      value: priceRange,
+      placeholder: 'Enter price range'
+    },
+    {
+      id: 'sort',
+      label: 'Sort By',
+      type: 'select',
+      options: [
+        { value: 'roi_desc', label: 'Highest ROI' },
+        { value: 'price_asc', label: 'Lowest Price' },
+        { value: 'price_desc', label: 'Highest Price' },
+        { value: 'name_asc', label: 'Name (A-Z)' },
+      ],
+      value: sortBy,
+      placeholder: 'Sort by'
+    }
+  ];
+
+  const handleFilterChange = (filterId: string, value: any) => {
+    switch (filterId) {
+      case 'type':
+        setSelectedType(value);
+        break;
+      case 'price':
+        setPriceRange(value);
+        break;
+      case 'sort':
+        setSortBy(value);
+        break;
+    }
+  };
+
+  const handleResetFilters = () => {
+    setSearchTerm('');
+    setSelectedType('all');
+    setPriceRange({ min: 0, max: 1000000 });
+    setSortBy('roi_desc');
+  };
+
+  const getAssetTypeColor = (type: string) => {
+    switch (type) {
+      case 'real_estate':
+        return 'from-blue-500 to-cyan-600';
+      case 'gold':
+        return 'from-amber-500 to-yellow-600';
+      case 'startup':
+        return 'from-purple-500 to-pink-600';
+      default:
+        return 'from-gray-500 to-gray-600';
     }
   };
 
@@ -87,23 +192,44 @@ export default function Marketplace() {
     }).format(amount);
   };
 
-  const formatLargeNumber = (num: number) => {
-    if (num >= 1000000) {
-      return (num / 1000000).toFixed(1) + 'M';
-    } else if (num >= 1000) {
-      return (num / 1000).toFixed(1) + 'K';
-    }
-    return num.toString();
+  const formatPercentage = (value: number | string) => {
+    const numValue = typeof value === 'string' ? parseFloat(value) : value;
+    if (isNaN(numValue)) return '0%';
+    return `${numValue >= 0 ? '+' : ''}${numValue.toFixed(1)}%`;
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
         <Navigation />
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading assets...</p>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent mb-4">
+              FractionFi Marketplace
+            </h1>
+            <p className="text-gray-600 text-lg">
+              Discover premium investment opportunities
+            </p>
+          </div>
+
+          {/* Loading Skeletons */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, index) => (
+              <div key={index} className="animate-pulse">
+                <Card variant="elevated" className="h-96">
+                  <div className="space-y-4">
+                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                    <div className="h-4 bg-gray-200 rounded w-1/2 ml-auto"></div>
+                    <div className="h-32 bg-gray-200 rounded mb-4"></div>
+                    <div className="space-y-2">
+                      <div className="h-3 bg-gray-200 rounded"></div>
+                      <div className="h-3 bg-gray-200 rounded w-4/5"></div>
+                    </div>
+                  </div>
+                </Card>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -111,151 +237,238 @@ export default function Marketplace() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
       <Navigation />
       
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Asset Marketplace</h1>
-          <p className="text-gray-600">Explore and invest in tokenized high-value assets</p>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent mb-4">
+            FractionFi Marketplace
+          </h1>
+          <p className="text-gray-600 text-lg">
+            Discover premium investment opportunities
+          </p>
         </div>
-      </div>
 
-      {/* Filters */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <div className="flex flex-col lg:flex-row gap-4">
-            {/* Search */}
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search assets..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
+        {/* Enhanced Search and Filters */}
+        <Card variant="glass" className="mb-8">
+          <div className="p-6">
+            {/* Search Bar */}
+            <div className="mb-6">
+              <SearchInput
+                value={searchTerm}
+                onChange={setSearchTerm}
+                placeholder="Search assets by name, type, or description..."
+                suggestions={searchSuggestions}
+                className="max-w-2xl mx-auto"
+              />
+            </div>
+
+            {/* Filter Controls */}
+            <div className="flex items-center justify-between mb-4">
+              <Button
+                variant="outline"
+                onClick={() => setShowFilters(!showFilters)}
+                className="flex items-center space-x-2"
+              >
+                <Filter className="h-4 w-4" />
+                <span>Advanced Filters</span>
+                {(selectedType !== 'all' || priceRange.max < 1000000) && (
+                  <span className="bg-blue-100 text-blue-600 text-xs px-2 py-1 rounded-full">
+                    Active
+                  </span>
+                )}
+              </Button>
+
+              {/* Results Count */}
+              <div className="text-sm text-gray-600">
+                Showing <span className="font-semibold text-blue-600">{processedAssets.length}</span> of{' '}
+                <span className="font-semibold text-gray-900">{assets.length}</span> assets
               </div>
             </div>
 
-            {/* Type Filter */}
-            <div className="flex items-center gap-2">
-              <Filter className="h-5 w-5 text-gray-500" />
-              <select
-                value={selectedType}
-                onChange={(e) => setSelectedType(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            {/* Advanced Filters */}
+            {showFilters && (
+              <AdvancedFilters
+                filters={filterGroups}
+                values={{
+                  type: selectedType,
+                  price: priceRange,
+                  sort: sortBy
+                }}
+                onChange={handleFilterChange}
+                onReset={handleResetFilters}
+                className="mt-4"
+              />
+            )}
+
+            {/* Quick Filter Pills */}
+            <div className="flex flex-wrap gap-2 mt-4">
+              <Button
+                variant={selectedType === 'all' ? 'primary' : 'outline'}
+                size="sm"
+                onClick={() => setSelectedType('all')}
               >
-                <option value="all">All Types</option>
-                <option value="real_estate">Real Estate</option>
-                <option value="gold">Gold</option>
-                <option value="startup">Startups</option>
-              </select>
+                All Assets
+              </Button>
+              <Button
+                variant={selectedType === 'real_estate' ? 'primary' : 'outline'}
+                size="sm"
+                onClick={() => setSelectedType('real_estate')}
+              >
+                <Building className="h-3 w-3 mr-1" />
+                Real Estate
+              </Button>
+              <Button
+                variant={selectedType === 'gold' ? 'primary' : 'outline'}
+                size="sm"
+                onClick={() => setSelectedType('gold')}
+              >
+                <Coins className="h-3 w-3 mr-1" />
+                Gold
+              </Button>
+              <Button
+                variant={selectedType === 'startup' ? 'primary' : 'outline'}
+                size="sm"
+                onClick={() => setSelectedType('startup')}
+              >
+                <Rocket className="h-3 w-3 mr-1" />
+                Startups
+              </Button>
             </div>
           </div>
-
-          {/* Stats */}
-          <div className="mt-4 flex items-center justify-between">
-            <p className="text-sm text-gray-600">
-              Showing {filteredAssets.length} of {assets.length} assets
-            </p>
-          </div>
-        </div>
+        </Card>
 
         {/* Assets Grid */}
-        {filteredAssets.length === 0 ? (
-          <div className="bg-white rounded-lg shadow p-12 text-center">
-            <TrendingUp className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No assets found</h3>
-            <p className="text-gray-600">
-              {searchTerm || selectedType !== 'all' 
+        {processedAssets.length === 0 ? (
+          <div className="text-center py-16">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
+              <Search className="h-8 w-8 text-gray-400" />
+            </div>
+            <h3 className="text-2xl font-semibold text-gray-900 mb-2">No assets found</h3>
+            <p className="text-gray-600 text-lg">
+              {searchTerm || selectedType !== 'all' || priceRange.max < 1000000
                 ? 'Try adjusting your filters or search terms'
                 : 'Check back later for new investment opportunities'
               }
             </p>
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredAssets.map((asset) => (
-              <div key={asset.id} className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            {processedAssets.map((asset, index) => (
+              <Card 
+                key={asset.id} 
+                variant="elevated" 
+                className="group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
+              >
                 {/* Asset Header */}
-                <div className="p-6 border-b">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className={`inline-flex items-center justify-center w-12 h-12 rounded-full ${
-                      asset.asset_type === 'real_estate' ? 'bg-blue-100 text-blue-600' :
-                      asset.asset_type === 'gold' ? 'bg-yellow-100 text-yellow-600' :
-                      'bg-purple-100 text-purple-600'
-                    }`}>
-                      {getAssetIcon(asset.asset_type)}
+                <div className="relative overflow-hidden rounded-t-2xl">
+                  <div className={cn(
+                    'h-2 bg-gradient-to-r opacity-90',
+                    getAssetTypeColor(asset.asset_type)
+                  )}></div>
+                  
+                  <div className="relative p-6 bg-white">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center space-x-3">
+                        <div className={cn(
+                          'inline-flex items-center justify-center w-12 h-12 rounded-full',
+                          asset.asset_type === 'real_estate' ? 'bg-blue-100 text-blue-600' :
+                          asset.asset_type === 'gold' ? 'bg-amber-100 text-amber-600' :
+                          'bg-purple-100 text-purple-600'
+                        )}>
+                          {getAssetIcon(asset.asset_type)}
+                        </div>
+                        <Badge 
+                          variant="gradient" 
+                          size="sm"
+                        >
+                          {asset.asset_type.replace('_', ' ').toUpperCase()}
+                        </Badge>
+                      </div>
+                      
+                      {/* ROI Badge */}
+                      {asset.roi_estimate && (
+                        <div className="flex items-center space-x-1">
+                          <Star className="h-4 w-4 text-yellow-500 fill-current" />
+                          <span className="text-sm font-semibold text-yellow-600">
+                            {formatPercentage(asset.roi_estimate)}
+                          </span>
+                        </div>
+                      )}
                     </div>
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      asset.asset_type === 'real_estate' ? 'bg-blue-100 text-blue-800' :
-                      asset.asset_type === 'gold' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-purple-100 text-purple-800'
-                    }`}>
-                      {asset.asset_type.replace('_', ' ').toUpperCase()}
-                    </span>
                   </div>
                   
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">{asset.name}</h3>
-                  <p className="text-gray-600 text-sm line-clamp-2">{asset.description}</p>
+                  <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors">
+                    {asset.name}
+                  </h3>
+                  <p className="text-gray-600 text-sm line-clamp-3 mb-4">
+                    {asset.description || 'Premium investment opportunity with high growth potential'}
+                  </p>
                 </div>
 
                 {/* Asset Details */}
-                <div className="p-6">
-                  <div className="grid grid-cols-2 gap-4 mb-4">
+                <div className="p-6 bg-gray-50 space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
                       <p className="text-sm text-gray-500 mb-1">Total Value</p>
-                      <p className="text-lg font-semibold text-gray-900">
+                      <p className="text-lg font-bold text-gray-900">
                         {formatCurrency(asset.total_value)}
                       </p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-500 mb-1">Token Price</p>
-                      <p className="text-lg font-semibold text-gray-900">
+                      <p className="text-lg font-bold text-gray-900">
                         {formatCurrency(asset.token_price)}
                       </p>
                     </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
                       <p className="text-sm text-gray-500 mb-1">Available Tokens</p>
-                      <p className="text-lg font-semibold text-gray-900">
-                        {formatLargeNumber(asset.available_tokens)}
+                      <p className="text-lg font-bold text-gray-900">
+                        {asset.available_tokens.toLocaleString()}
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500 mb-1">Est. ROI</p>
-                      <p className="text-lg font-semibold text-green-600">
-                        {asset.roi_estimate ? `+${asset.roi_estimate}%` : 'N/A'}
+                      <p className="text-sm text-gray-500 mb-1">Total Supply</p>
+                      <p className="text-lg font-bold text-gray-900">
+                        {asset.total_supply.toLocaleString()}
                       </p>
                     </div>
                   </div>
 
                   {/* Progress Bar */}
-                  <div className="mb-4">
-                    <div className="flex justify-between text-sm text-gray-600 mb-1">
-                      <span>Tokens Sold</span>
-                      <span>{Math.round(((asset.total_supply - asset.available_tokens) / asset.total_supply) * 100)}%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div>
+                    <p className="text-sm text-gray-500 mb-2">Funding Progress</p>
+                    <div className="w-full bg-gray-200 rounded-full h-3">
                       <div 
-                        className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${((asset.total_supply - asset.available_tokens) / asset.total_supply) * 100}%` }}
+                        className={cn(
+                          'h-full rounded-full bg-gradient-to-r transition-all duration-500',
+                          getAssetTypeColor(asset.asset_type)
+                        )}
+                        style={{ 
+                          width: `${((asset.total_supply - asset.available_tokens) / asset.total_supply) * 100}%` 
+                        }}
                       ></div>
                     </div>
                   </div>
+                </div>
 
-                  {/* Action Button */}
-                  <button
+                {/* Action Button */}
+                <div className="p-6">
+                  <Button 
+                    className="w-full group-hover:scale-105"
                     onClick={() => window.location.href = `/assets/${asset.id}`}
-                    className="w-full flex items-center justify-center px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
                   >
                     <Eye className="h-4 w-4 mr-2" />
                     View Details
-                  </button>
+                    <ArrowUpRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                  </Button>
                 </div>
-              </div>
+              </Card>
             ))}
           </div>
         )}

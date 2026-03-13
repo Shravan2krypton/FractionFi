@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
 import { initDatabase } from './models/database';
+import { apiLimiter } from './middleware/rateLimiter';
 
 // Import routes
 import authRoutes from './routes/auth';
@@ -19,12 +20,15 @@ const PORT = process.env.PORT || 3002;
 // Middleware
 app.use(helmet());
 app.use(cors({
-  origin: ['http://localhost:3001', 'http://localhost:3000'],
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
   credentials: true
 }));
 app.use(morgan('combined'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Apply rate limiting to all API routes
+app.use('/api/', apiLimiter);
 
 // Routes
 app.get('/api/health', (req, res) => {

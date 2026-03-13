@@ -17,6 +17,7 @@ export interface CreateUserRequest {
   email: string;
   password: string;
   wallet_address?: string;
+  role?: 'user' | 'admin';
 }
 
 export class UserModel {
@@ -24,8 +25,8 @@ export class UserModel {
     const hashedPassword = await bcrypt.hash(userData.password, 10);
     
     const query = `
-      INSERT INTO users (name, email, password_hash, wallet_address)
-      VALUES ($1, $2, $3, $4)
+      INSERT INTO users (name, email, password_hash, wallet_address, role)
+      VALUES ($1, $2, $3, $4, $5)
       RETURNING *
     `;
     
@@ -33,7 +34,8 @@ export class UserModel {
       userData.name,
       userData.email,
       hashedPassword,
-      userData.wallet_address || null
+      userData.wallet_address || null,
+      userData.role || 'user'
     ];
     
     const result = await pool.query(query, values);

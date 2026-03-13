@@ -10,15 +10,14 @@
   },
   "dependencies": {
     "@tanstack/react-query": "^5.90.21",
-    "@web3modal/wagmi": "^5.1.11",
+    "clsx": "^2.1.1",
     "ethers": "^6.16.0",
     "lucide-react": "^0.577.0",
     "next": "16.1.6",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "recharts": "^3.8.0",
-    "viem": "^2.47.2",
-    "wagmi": "^3.5.0"
+    "viem": "^2.47.2"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

@@ -15,21 +15,30 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   Wallet,
-  History
+  History,
+  RefreshCw,
+  Activity
 } from 'lucide-react';
+import { AnimatedChart } from '@/components/charts/AnimatedChart';
+import { StatsCard } from '@/components/ui/StatsCard';
+import { Card } from '@/components/ui/Card';
+import { Badge } from '@/components/ui/Badge';
+import { useRealTimeData } from '@/hooks/useRealTimeData';
+import { cn } from '@/lib/utils';
 import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
   ResponsiveContainer,
+  LineChart,
+  BarChart,
   PieChart as RePieChart,
   Pie,
   Cell,
-  BarChart,
-  Bar
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Line,
+  Bar,
+  Legend
 } from 'recharts';
 
 interface Investment {
@@ -61,6 +70,7 @@ export default function Dashboard() {
     totalAssets: 0
   });
   const [loading, setLoading] = useState(true);
+  const [profitHistory, setProfitHistory] = useState<{date: string, profit: number}[]>([]);
 
   useEffect(() => {
     if (user) {
@@ -92,11 +102,37 @@ export default function Dashboard() {
       const statsData = await statsResponse.json();
       setStats(statsData);
       
+      // Generate mock profit history for demonstration
+      const mockProfitHistory = generateMockProfitHistory(statsData.totalProfitLoss);
+      setProfitHistory(mockProfitHistory);
+      
       setLoading(false);
     } catch (error) {
       console.error('Error fetching portfolio data:', error);
       setLoading(false);
     }
+  };
+
+  const generateMockProfitHistory = (totalProfit: number) => {
+    const history = [];
+    const today = new Date();
+    
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      
+      // Generate realistic profit fluctuations
+      const baseProfit = totalProfit * (i / 6);
+      const randomVariation = (Math.random() - 0.5) * totalProfit * 0.1;
+      const profit = Math.max(0, baseProfit + randomVariation);
+      
+      history.push({
+        date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        profit: profit
+      });
+    }
+    
+    return history;
   };
 
   const formatCurrency = (amount: number) => {
@@ -264,6 +300,26 @@ export default function Dashboard() {
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
+            {/* P&L Trend Chart */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-xl font-bold text-gray-900 mb-4">Profit & Loss Trend (7 Days)</h2>
+              <ResponsiveContainer width="100%" height={250}>
+                <LineChart data={profitHistory}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="date" />
+                  <YAxis />
+                  <Tooltip formatter={(value) => formatCurrency(Number(value))} />
+                  <Line 
+                    type="monotone" 
+                    dataKey="profit" 
+                    stroke={stats.totalProfitLoss >= 0 ? '#10B981' : '#EF4444'}
+                    strokeWidth={2}
+                    dot={{ fill: stats.totalProfitLoss >= 0 ? '#10B981' : '#EF4444' }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+
             {/* Portfolio Performance Chart */}
             <div className="bg-white rounded-lg shadow p-6">
               <h2 className="text-xl font-bold text-gray-900 mb-4">Portfolio Performance</h2>
@@ -288,15 +344,57 @@ export default function Dashboard() {
             <div className="bg-white rounded-lg shadow p-6">
               <h2 className="text-xl font-bold text-gray-900 mb-4">Asset Performance</h2>
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={performanceData}>
+                <BarChart data={performanceData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip formatter={(value) => formatCurrency(Number(value))} />
-                  <Bar dataKey="invested" fill="#94A3B8" />
-                  <Bar dataKey="current" fill="#10B981" />
+                  <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                  <YAxis tick={{ fontSize: 12 }} />
+                  <Tooltip 
+                    formatter={(value, name) => [formatCurrency(Number(value)), name === 'invested' ? 'Amount Invested' : name === 'current' ? 'Current Value' : 'Profit/Loss']}
+                    contentStyle={{ backgroundColor: 'white', border: '1px solid #e5e7eb', borderRadius: '8px' }}
+                  />
+                  <Legend />
+                  <Bar dataKey="invested" fill="#94A3B8" name="Invested" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="current" fill="#10B981" name="Current Value" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
+              
+              {/* Performance Summary */}
+              {investments.length > 0 && (
+                <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {investments.slice(0, 3).map((investment, index) => (
+                    <div key={investment.id} className="bg-gray-50 rounded-lg p-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium text-gray-900 truncate">
+                          {investment.asset_name}
+                        </span>
+                        <div className={`p-1 rounded-full ${
+                          investment.asset_type === 'real_estate' ? 'bg-blue-100' :
+                          investment.asset_type === 'gold' ? 'bg-yellow-100' :
+                          'bg-purple-100'
+                        }`}>
+                          {getAssetIcon(investment.asset_type)}
+                        </div>
+                      </div>
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-xs">
+                          <span className="text-gray-600">Invested:</span>
+                          <span className="font-medium">{formatCurrency(investment.total_invested)}</span>
+                        </div>
+                        <div className="flex justify-between text-xs">
+                          <span className="text-gray-600">Current:</span>
+                          <span className="font-medium">{formatCurrency(investment.current_value)}</span>
+                        </div>
+                        <div className={`flex justify-between text-xs font-medium ${
+                          investment.profit_loss >= 0 ? 'text-green-600' : 'text-red-600'
+                        }`}>
+                          <span>P&L:</span>
+                          <span>{investment.profit_loss >= 0 ? '+' : ''}{formatCurrency(investment.profit_loss)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 

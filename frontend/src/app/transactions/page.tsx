@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Navigation } from '@/components/layout/Navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { apiFetch } from '@/utils/api';
@@ -17,6 +17,9 @@ import {
   Clock,
   XCircle
 } from 'lucide-react';
+import { SearchInput } from '@/components/ui/SearchInput';
+import { AdvancedFilters, FilterGroup } from '@/components/ui/AdvancedFilters';
+import { Button } from '@/components/ui/Button';
 
 interface Transaction {
   id: number;
@@ -41,6 +44,8 @@ export default function Transactions() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [blockchainStatuses, setBlockchainStatuses] = useState<{[key: string]: 'verified' | 'pending' | 'failed'}>({});
+  const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -55,20 +60,51 @@ export default function Transactions() {
   const fetchTransactions = async () => {
     try {
       const token = localStorage.getItem('token');
-      
+      if (!token) return;
+
       const response = await apiFetch('/api/investments/transactions', {
+        method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
         },
       });
       
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const data = await response.json();
       setTransactions(data.transactions || []);
+      
+      // Verify blockchain transactions
+      await verifyBlockchainTransactions(data.transactions || []);
+      
       setLoading(false);
     } catch (error) {
       console.error('Error fetching transactions:', error);
+      setTransactions([]); // Set empty array on error
       setLoading(false);
     }
+  };
+
+  const verifyBlockchainTransactions = async (transactions: Transaction[]) => {
+    const statuses: {[key: string]: 'verified' | 'pending' | 'failed'} = {};
+    
+    for (const tx of transactions) {
+      if (tx.blockchain_tx_hash) {
+        try {
+          // In a real implementation, you'd verify the transaction on blockchain
+          // For now, we'll simulate verification
+          statuses[tx.blockchain_tx_hash] = 'verified';
+        } catch (error) {
+          statuses[tx.blockchain_tx_hash] = 'failed';
+        }
+      } else {
+        statuses[tx.transaction_hash || ''] = 'pending';
+      }
+    }
+    
+    setBlockchainStatuses(statuses);
   };
 
   const filterTransactions = () => {
@@ -94,6 +130,74 @@ export default function Transactions() {
     }
 
     setFilteredTransactions(filtered);
+  };
+
+  // Generate search suggestions
+  const searchSuggestions = useMemo(() => {
+    const uniqueAssets = [...new Map(transactions.map(tx => [tx.asset_name, tx])).values()];
+    const assetSuggestions = uniqueAssets.slice(0, 8).map(tx => ({
+      id: tx.id.toString(),
+      text: tx.asset_name,
+      type: 'asset' as const,
+      category: tx.asset_type.replace('_', ' '),
+      icon: getTypeIcon(tx.transaction_type)
+    }));
+    
+    // Add popular searches
+    const popularSearches = [
+      { id: 'popular-1', text: 'Purchase', type: 'popular' as const, category: 'Transaction Type' },
+      { id: 'popular-2', text: 'Completed', type: 'popular' as const, category: 'Status' },
+      { id: 'popular-3', text: 'Real Estate', type: 'popular' as const, category: 'Asset Type' },
+    ];
+    
+    return [...popularSearches, ...assetSuggestions];
+  }, [transactions]);
+
+  // Filter configuration for advanced filters
+  const filterGroups: FilterGroup[] = [
+    {
+      id: 'type',
+      label: 'Transaction Type',
+      type: 'select',
+      options: [
+        { value: 'all', label: 'All Types' },
+        { value: 'purchase', label: 'Purchases' },
+        { value: 'sale', label: 'Sales' },
+        { value: 'profit_distribution', label: 'Profit Distributions' },
+      ],
+      value: filterType,
+      placeholder: 'Select transaction type'
+    },
+    {
+      id: 'status',
+      label: 'Status',
+      type: 'select',
+      options: [
+        { value: 'all', label: 'All Status' },
+        { value: 'completed', label: 'Completed' },
+        { value: 'pending', label: 'Pending' },
+        { value: 'failed', label: 'Failed' },
+      ],
+      value: filterStatus,
+      placeholder: 'Select status'
+    }
+  ];
+
+  const handleFilterChange = (filterId: string, value: any) => {
+    switch (filterId) {
+      case 'type':
+        setFilterType(value);
+        break;
+      case 'status':
+        setFilterStatus(value);
+        break;
+    }
+  };
+
+  const handleResetFilters = () => {
+    setSearchTerm('');
+    setFilterType('all');
+    setFilterStatus('all');
   };
 
   const formatCurrency = (amount: number) => {
@@ -199,70 +303,106 @@ export default function Transactions() {
         </div>
       </div>
 
-      {/* Filters */}
+      {/* Enhanced Search and Filters */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <div className="flex flex-col lg:flex-row gap-4">
-            {/* Search */}
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search transactions..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-            </div>
-
-            {/* Type Filter */}
-            <div className="flex items-center gap-2">
-              <Filter className="h-5 w-5 text-gray-500" />
-              <select
-                value={filterType}
-                onChange={(e) => setFilterType(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="all">All Types</option>
-                <option value="purchase">Purchases</option>
-                <option value="sale">Sales</option>
-                <option value="profit_distribution">Profit Distributions</option>
-              </select>
-            </div>
-
-            {/* Status Filter */}
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="all">All Status</option>
-              <option value="completed">Completed</option>
-              <option value="pending">Pending</option>
-              <option value="failed">Failed</option>
-            </select>
+          {/* Search Bar */}
+          <div className="mb-6">
+            <SearchInput
+              value={searchTerm}
+              onChange={setSearchTerm}
+              placeholder="Search transactions by asset name, hash, or type..."
+              suggestions={searchSuggestions}
+              className="max-w-2xl"
+            />
           </div>
 
-          {/* Stats */}
-          <div className="mt-4 flex items-center justify-between">
-            <p className="text-sm text-gray-600">
+          {/* Filter Controls */}
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center space-x-4">
+              <Button
+                variant="outline"
+                onClick={() => setShowFilters(!showFilters)}
+                className="flex items-center space-x-2"
+              >
+                <Filter className="h-4 w-4" />
+                <span>Filters</span>
+                {(filterType !== 'all' || filterStatus !== 'all') && (
+                  <span className="bg-blue-100 text-blue-600 text-xs px-2 py-1 rounded-full">
+                    Active
+                  </span>
+                )}
+              </Button>
+
+              {/* Quick Filter Pills */}
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant={filterType === 'all' ? 'primary' : 'outline'}
+                  size="sm"
+                  onClick={() => setFilterType('all')}
+                >
+                  All Types
+                </Button>
+                <Button
+                  variant={filterType === 'purchase' ? 'primary' : 'outline'}
+                  size="sm"
+                  onClick={() => setFilterType('purchase')}
+                >
+                  <TrendingUp className="h-3 w-3 mr-1" />
+                  Purchases
+                </Button>
+                <Button
+                  variant={filterType === 'sale' ? 'primary' : 'outline'}
+                  size="sm"
+                  onClick={() => setFilterType('sale')}
+                >
+                  <TrendingDown className="h-3 w-3 mr-1" />
+                  Sales
+                </Button>
+                <Button
+                  variant={filterType === 'profit_distribution' ? 'primary' : 'outline'}
+                  size="sm"
+                  onClick={() => setFilterType('profit_distribution')}
+                >
+                  <Wallet className="h-3 w-3 mr-1" />
+                  Profits
+                </Button>
+              </div>
+            </div>
+
+            {/* Results Count */}
+            <div className="text-sm text-gray-600">
               Showing {filteredTransactions.length} of {transactions.length} transactions
-            </p>
-            <div className="flex items-center space-x-4 text-sm">
-              <div className="flex items-center">
-                <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
-                <span>Purchase</span>
-              </div>
-              <div className="flex items-center">
-                <div className="w-3 h-3 bg-red-500 rounded-full mr-2"></div>
-                <span>Sale</span>
-              </div>
-              <div className="flex items-center">
-                <div className="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
-                <span>Profit</span>
-              </div>
+            </div>
+          </div>
+
+          {/* Advanced Filters */}
+          {showFilters && (
+            <AdvancedFilters
+              filters={filterGroups}
+              values={{
+                type: filterType,
+                status: filterStatus
+              }}
+              onChange={handleFilterChange}
+              onReset={handleResetFilters}
+              className="mt-4"
+            />
+          )}
+
+          {/* Status Legend */}
+          <div className="flex items-center space-x-4 text-sm pt-4 border-t border-gray-100">
+            <div className="flex items-center">
+              <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+              <span>Purchase</span>
+            </div>
+            <div className="flex items-center">
+              <div className="w-3 h-3 bg-red-500 rounded-full mr-2"></div>
+              <span>Sale</span>
+            </div>
+            <div className="flex items-center">
+              <div className="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
+              <span>Profit</span>
             </div>
           </div>
         </div>
@@ -345,6 +485,28 @@ export default function Transactions() {
                           <span className={`ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(transaction.status)}`}>
                             {transaction.status}
                           </span>
+                          {transaction.blockchain_tx_hash && (
+                            <div className="ml-2 flex items-center">
+                              {blockchainStatuses[transaction.blockchain_tx_hash] === 'verified' && (
+                                <div className="flex items-center text-green-600">
+                                  <CheckCircle className="h-3 w-3 mr-1" />
+                                  <span className="text-xs">On-Chain</span>
+                                </div>
+                              )}
+                              {blockchainStatuses[transaction.blockchain_tx_hash] === 'pending' && (
+                                <div className="flex items-center text-yellow-600">
+                                  <Clock className="h-3 w-3 mr-1" />
+                                  <span className="text-xs">Pending</span>
+                                </div>
+                              )}
+                              {blockchainStatuses[transaction.blockchain_tx_hash] === 'failed' && (
+                                <div className="flex items-center text-red-600">
+                                  <XCircle className="h-3 w-3 mr-1" />
+                                  <span className="text-xs">Failed</span>
+                                </div>
+                              )}
+                            </div>
+                          )}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">

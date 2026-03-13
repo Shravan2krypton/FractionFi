@@ -394,15 +394,15 @@ export default function Transactions() {
           <div className="flex items-center space-x-4 text-sm pt-4 border-t border-gray-100">
             <div className="flex items-center">
               <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
-              <span>Purchase</span>
+              <span className="text-black font-medium">Purchase</span>
             </div>
             <div className="flex items-center">
               <div className="w-3 h-3 bg-red-500 rounded-full mr-2"></div>
-              <span>Sale</span>
+              <span className="text-black font-medium">Sale</span>
             </div>
             <div className="flex items-center">
               <div className="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
-              <span>Profit</span>
+              <span className="text-black font-medium">Profit</span>
             </div>
           </div>
         </div>

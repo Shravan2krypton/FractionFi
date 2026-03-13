@@ -3,9 +3,12 @@
 import React from 'react';
 import Link from 'next/link';
 import { Navigation } from '@/components/layout/Navigation';
+import { useAuth } from '@/contexts/AuthContext';
 import { TrendingUp, Building, Coins, Rocket, ArrowRight, Shield, Users, BarChart3 } from 'lucide-react';
 
 export default function Home() {
+  const { user } = useAuth();
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation />
@@ -15,12 +18,14 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
           <div className="text-center">
             <h1 className="text-4xl md:text-6xl font-bold mb-6">
-              Invest in Fractional
+              {user ? "Welcome back to" : "Invest in Fractional"}
               <span className="text-yellow-400"> High-Value Assets</span>
             </h1>
             <p className="text-xl md:text-2xl mb-8 text-blue-100 max-w-3xl mx-auto">
-              Own pieces of premium real estate, gold reserves, and promising startups. 
-              Start investing with as little as ₹100 through blockchain-powered tokenization.
+              {user 
+                ? "Continue your investment journey and track your portfolio performance."
+                : "Own pieces of premium real estate, gold reserves, and promising startups. Start investing with as little as ₹100 through blockchain-powered tokenization."
+              }
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
@@ -31,10 +36,10 @@ export default function Home() {
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
               <Link
-                href="/register"
+                href={user ? "/dashboard" : "/register"}
                 className="inline-flex items-center justify-center px-8 py-4 bg-transparent border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-blue-600 transition-colors"
               >
-                Get Started
+                {user ? "Go to Dashboard" : "Get Started"}
               </Link>
             </div>
           </div>
@@ -222,10 +227,10 @@ export default function Home() {
             Join thousands of investors already earning passive income through fractional ownership.
           </p>
           <Link
-            href="/register"
+            href={user ? "/dashboard" : "/register"}
             className="inline-flex items-center justify-center px-8 py-4 bg-white text-blue-600 font-semibold rounded-lg hover:bg-blue-50 transition-colors"
           >
-            Get Started Now
+            {user ? "Go to Dashboard" : "Get Started Now"}
             <ArrowRight className="ml-2 h-5 w-5" />
           </Link>
         </div>

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Navigation } from '@/components/layout/Navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { apiFetch } from '@/utils/api';
 import { 
   TrendingUp, 
   Users, 
@@ -90,7 +91,7 @@ export default function AdminPanel() {
       
       switch (activeTab) {
         case 'dashboard':
-          const dashboardResponse = await fetch('/api/admin/dashboard', {
+          const dashboardResponse = await apiFetch('/api/admin/dashboard', {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           const dashboardData = await dashboardResponse.json();
@@ -98,7 +99,7 @@ export default function AdminPanel() {
           break;
           
         case 'assets':
-          const assetsResponse = await fetch('/api/assets', {
+          const assetsResponse = await apiFetch('/api/assets', {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           const assetsData = await assetsResponse.json();
@@ -106,7 +107,7 @@ export default function AdminPanel() {
           break;
           
         case 'users':
-          const usersResponse = await fetch('/api/admin/users', {
+          const usersResponse = await apiFetch('/api/admin/users', {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           const usersData = await usersResponse.json();
@@ -114,7 +115,7 @@ export default function AdminPanel() {
           break;
           
         case 'transactions':
-          const transactionsResponse = await fetch('/api/admin/transactions', {
+          const transactionsResponse = await apiFetch('/api/admin/transactions', {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           const transactionsData = await transactionsResponse.json();

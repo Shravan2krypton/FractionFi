@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Navigation } from '@/components/layout/Navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { apiFetch } from '@/utils/api';
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -72,7 +73,7 @@ export default function Dashboard() {
       const token = localStorage.getItem('token');
       
       // Fetch investments
-      const investmentsResponse = await fetch('/api/investments', {
+      const investmentsResponse = await apiFetch('/api/investments', {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -82,7 +83,7 @@ export default function Dashboard() {
       setInvestments(investmentsData.investments || []);
 
       // Fetch portfolio stats
-      const statsResponse = await fetch('/api/investments/stats', {
+      const statsResponse = await apiFetch('/api/investments/stats', {
         headers: {
           'Authorization': `Bearer ${token}`,
         },

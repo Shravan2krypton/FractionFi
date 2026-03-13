@@ -7,8 +7,8 @@ import { initDatabase } from './models/database';
 
 // Import routes
 import authRoutes from './routes/auth';
-import mockAssetRoutes from './routes/mockAssets';
-import mockInvestmentRoutes from './routes/mockInvestments';
+import assetRoutes from './routes/assets';
+import investmentRoutes from './routes/investments';
 import adminRoutes from './routes/admin';
 
 dotenv.config();
@@ -32,15 +32,15 @@ app.get('/api/health', (req, res) => {
 });
 
 app.use('/api/auth', authRoutes);
-app.use('/api/assets', mockAssetRoutes);
-app.use('/api/investments', mockInvestmentRoutes);
+app.use('/api/assets', assetRoutes);
+app.use('/api/investments', investmentRoutes);
 app.use('/api/admin', adminRoutes);
 
 // Initialize database and start server
 const startServer = async () => {
   try {
-    // await initDatabase(); // Temporarily disabled
-    console.log('Database initialization skipped for testing');
+    await initDatabase();
+    console.log('Database initialized successfully');
     
     app.listen(PORT, () => {
       console.log(`🚀 FractionFi API server running on port ${PORT}`);

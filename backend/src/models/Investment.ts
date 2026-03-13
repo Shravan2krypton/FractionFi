@@ -1,4 +1,4 @@
-import pool from './database';
+import { pool } from '../config/database';
 
 export interface Investment {
   id?: number;

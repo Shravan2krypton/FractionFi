@@ -1,12 +1,10 @@
-import { Pool } from 'pg';
-
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-});
+import { pool } from '../config/database';
 
 // Initialize database tables
 export const initDatabase = async () => {
   try {
+    console.log('Initializing database with connection...');
+    
     // Users table
     await pool.query(`
       CREATE TABLE IF NOT EXISTS users (

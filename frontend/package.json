@@ -17,7 +17,7 @@
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "recharts": "^3.8.0",
-    "viem": "^2.47.1",
+    "viem": "^2.47.2",
     "wagmi": "^3.5.0"
   },
   "devDependencies": {

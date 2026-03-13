@@ -6,6 +6,7 @@ import { Navigation } from '@/components/layout/Navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useWallet } from '@/contexts/WalletContext';
 import { Building, Coins, Rocket, ArrowLeft, TrendingUp, Users, Shield, Calculator, AlertCircle } from 'lucide-react';
+import { apiFetch } from '@/utils/api';
 
 interface Asset {
   id: number;
@@ -41,7 +42,7 @@ export default function AssetDetails() {
 
   const fetchAsset = async (id: string) => {
     try {
-      const response = await fetch(`http://localhost:3002/api/assets/${id}`);
+      const response = await apiFetch(`/api/assets/${id}`);
       const data = await response.json();
       
       if (!response.ok) {
@@ -82,10 +83,9 @@ export default function AssetDetails() {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:3002/api/investments/purchase', {
+      const response = await apiFetch('/api/investments/purchase', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
         },
         body: JSON.stringify({

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Navigation } from '@/components/layout/Navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { apiFetch } from '@/utils/api';
 import { 
   Wallet, 
   TrendingUp, 
@@ -55,7 +56,7 @@ export default function Transactions() {
     try {
       const token = localStorage.getItem('token');
       
-      const response = await fetch('/api/investments/transactions', {
+      const response = await apiFetch('/api/investments/transactions', {
         headers: {
           'Authorization': `Bearer ${token}`,
         },

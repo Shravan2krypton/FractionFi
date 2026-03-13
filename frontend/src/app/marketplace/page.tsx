@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Navigation } from '@/components/layout/Navigation';
 import { Building, Coins, Rocket, Filter, Search, TrendingUp, Eye } from 'lucide-react';
+import { apiFetch } from '@/utils/api';
 
 interface Asset {
   id: number;
@@ -35,7 +36,7 @@ export default function Marketplace() {
 
   const fetchAssets = async () => {
     try {
-      const response = await fetch('http://localhost:3002/api/assets');
+      const response = await apiFetch('/api/assets');
       const data = await response.json();
       setAssets(data.assets || []);
       setLoading(false);

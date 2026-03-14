@@ -84,6 +84,15 @@
   background-color: #2a2a2a !important;
 }
 
+/* Dark mode gradients */
+.dark .bg-gradient-to-br.from-gray-50.via-white.to-blue-50 {
+  background: linear-gradient(to bottom right, #1f2937, #111827, #1f2937) !important;
+}
+
+.dark .bg-gradient-to-br.from-gray-50.to-gray-100 {
+  background: linear-gradient(to bottom right, #1f2937, #111827) !important;
+}
+
 .dark .text-gray-900 {
   color: #ededed !important;
 }

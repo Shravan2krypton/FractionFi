@@ -41,6 +41,16 @@ export const WalletProvider: React.FC<WalletProviderProps> = ({ children }) => {
   const [manuallyDisconnected, setManuallyDisconnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Clear error after 5 seconds
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
   useEffect(() => {
     checkConnection();
     setupEventListeners();
@@ -192,17 +202,15 @@ export const WalletProvider: React.FC<WalletProviderProps> = ({ children }) => {
       setManuallyDisconnected(false);
       setError(null);
     } catch (error: any) {
-      console.error('Error connecting wallet:', error);
-      
-      // Handle user rejection specifically
+      // Handle user rejection specifically - don't log to console as this is expected behavior
       if (error.code === 4001 || error.message?.includes('User rejected the request')) {
-        setError('Wallet connection was cancelled. Please try again if you want to connect.');
+        setError('Connection cancelled. You can try again when ready.');
       } else {
+        console.error('Error connecting wallet:', error);
         setError(error.message || 'Failed to connect wallet');
       }
       
       setConnectionRequested(false);
-    } finally {
       setIsConnecting(false);
     }
   };

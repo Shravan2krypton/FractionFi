@@ -200,7 +200,7 @@ export default function Marketplace() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
         <Navigation />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Header */}
@@ -208,7 +208,7 @@ export default function Marketplace() {
             <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent mb-4">
               FractionFi Marketplace
             </h1>
-            <p className="text-gray-600 text-lg">
+            <p className="text-gray-600 dark:text-gray-300 text-lg">
               Discover premium investment opportunities
             </p>
           </div>
@@ -237,7 +237,7 @@ export default function Marketplace() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <Navigation />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -246,7 +246,7 @@ export default function Marketplace() {
           <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent mb-4">
             FractionFi Marketplace
           </h1>
-          <p className="text-gray-600 text-lg">
+          <p className="text-gray-600 dark:text-gray-300 text-lg">
             Discover premium investment opportunities
           </p>
         </div>
@@ -275,16 +275,16 @@ export default function Marketplace() {
                 <Filter className="h-4 w-4" />
                 <span>Advanced Filters</span>
                 {(selectedType !== 'all' || priceRange.max < 1000000) && (
-                  <span className="bg-blue-100 text-blue-600 text-xs px-2 py-1 rounded-full">
+                  <span className="bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 text-xs px-2 py-1 rounded-full">
                     Active
                   </span>
                 )}
               </Button>
 
               {/* Results Count */}
-              <div className="text-sm text-gray-600">
-                Showing <span className="font-semibold text-blue-600">{processedAssets.length}</span> of{' '}
-                <span className="font-semibold text-gray-900">{assets.length}</span> assets
+              <div className="text-sm text-gray-600 dark:text-gray-300">
+                Showing <span className="font-semibold text-blue-600 dark:text-blue-400">{processedAssets.length}</span> of{' '}
+                <span className="font-semibold text-gray-900 dark:text-gray-100">{assets.length}</span> assets
               </div>
             </div>
 
@@ -343,11 +343,11 @@ export default function Marketplace() {
         {/* Assets Grid */}
         {processedAssets.length === 0 ? (
           <div className="text-center py-16">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
-              <Search className="h-8 w-8 text-gray-400" />
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full mb-4">
+              <Search className="h-8 w-8 text-gray-400 dark:text-gray-500" />
             </div>
-            <h3 className="text-2xl font-semibold text-gray-900 mb-2">No assets found</h3>
-            <p className="text-gray-600 text-lg">
+            <h3 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-2">No assets found</h3>
+            <p className="text-gray-600 dark:text-gray-300 text-lg">
               {searchTerm || selectedType !== 'all' || priceRange.max < 1000000
                 ? 'Try adjusting your filters or search terms'
                 : 'Check back later for new investment opportunities'
@@ -369,7 +369,7 @@ export default function Marketplace() {
                     getAssetTypeColor(asset.asset_type)
                   )}></div>
                   
-                  <div className="relative p-6 bg-white">
+                  <div className="relative p-6 bg-white dark:bg-gray-800">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center space-x-3">
                         <div className={cn(
@@ -400,26 +400,26 @@ export default function Marketplace() {
                     </div>
                   </div>
                   
-                  <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors">
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-3 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                     {asset.name}
                   </h3>
-                  <p className="text-gray-600 text-sm line-clamp-3 mb-4">
+                  <p className="text-gray-600 dark:text-gray-300 text-sm line-clamp-3 mb-4">
                     {asset.description || 'Premium investment opportunity with high growth potential'}
                   </p>
                 </div>
 
                 {/* Asset Details */}
-                <div className="p-6 bg-gray-50 space-y-4">
+                <div className="p-6 bg-gray-50 dark:bg-gray-800 space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <p className="text-sm text-gray-500 mb-1">Total Value</p>
-                      <p className="text-lg font-bold text-gray-900">
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Total Value</p>
+                      <p className="text-lg font-bold text-gray-900 dark:text-gray-100">
                         {formatCurrency(asset.total_value)}
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500 mb-1">Token Price</p>
-                      <p className="text-lg font-bold text-gray-900">
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Token Price</p>
+                      <p className="text-lg font-bold text-gray-900 dark:text-gray-100">
                         {formatCurrency(asset.token_price)}
                       </p>
                     </div>
@@ -427,14 +427,14 @@ export default function Marketplace() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <p className="text-sm text-gray-500 mb-1">Available Tokens</p>
-                      <p className="text-lg font-bold text-gray-900">
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Available Tokens</p>
+                      <p className="text-lg font-bold text-gray-900 dark:text-gray-100">
                         {asset.available_tokens.toLocaleString()}
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500 mb-1">Total Supply</p>
-                      <p className="text-lg font-bold text-gray-900">
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Total Supply</p>
+                      <p className="text-lg font-bold text-gray-900 dark:text-gray-100">
                         {asset.total_supply.toLocaleString()}
                       </p>
                     </div>
@@ -442,8 +442,8 @@ export default function Marketplace() {
 
                   {/* Progress Bar */}
                   <div>
-                    <p className="text-sm text-gray-500 mb-2">Funding Progress</p>
-                    <div className="w-full bg-gray-200 rounded-full h-3">
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Funding Progress</p>
+                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
                       <div 
                         className={cn(
                           'h-full rounded-full bg-gradient-to-r transition-all duration-500',

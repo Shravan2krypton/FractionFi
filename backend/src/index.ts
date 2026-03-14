@@ -11,6 +11,7 @@ import authRoutes from './routes/auth';
 import assetRoutes from './routes/assets';
 import investmentRoutes from './routes/investments';
 import adminRoutes from './routes/admin';
+import transactionRoutes from './routes/transactions';
 
 dotenv.config();
 
@@ -38,6 +39,7 @@ app.get('/api/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/assets', assetRoutes);
 app.use('/api/investments', investmentRoutes);
+app.use('/api/transactions', transactionRoutes);
 app.use('/api/admin', adminRoutes);
 
 // Initialize database and start server

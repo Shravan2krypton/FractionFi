@@ -199,12 +199,12 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 dark:from-gray-900 dark:to-gray-800 dark:bg-gradient-to-br">
         <Navigation />
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading your portfolio...</p>
+            <p className="text-gray-600 dark:text-gray-300">Loading your portfolio...</p>
           </div>
         </div>
       </div>
@@ -212,14 +212,14 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:from-gray-900 dark:to-gray-800 dark:bg-gradient-to-br">
       <Navigation />
       
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
+      <div className="bg-white dark:bg-gray-800 shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <h1 className="text-3xl font-bold text-gray-900">Portfolio Dashboard</h1>
-          <p className="text-gray-600 mt-2">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Portfolio Dashboard</h1>
+          <p className="text-gray-600 dark:text-gray-300 mt-2">
             Welcome back, {user?.name}! Here's your investment overview.
           </p>
         </div>
@@ -228,11 +228,11 @@ export default function Dashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 mb-1">Total Invested</p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Total Invested</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                   {formatCurrency(stats.totalInvested)}
                 </p>
               </div>
@@ -242,11 +242,11 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 mb-1">Current Value</p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Current Value</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                   {formatCurrency(stats.currentValue)}
                 </p>
               </div>
@@ -256,10 +256,10 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 mb-1">Total P&L</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Total P&L</p>
                 <p className={`text-2xl font-bold ${
                   stats.totalProfitLoss >= 0 ? 'text-green-600' : 'text-red-600'
                 }`}>
@@ -284,11 +284,11 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 mb-1">Assets Owned</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.totalAssets}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Assets Owned</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.totalAssets}</p>
               </div>
               <div className="bg-purple-100 p-3 rounded-full">
                 <PieChart className="h-6 w-6 text-purple-600" />
@@ -301,7 +301,7 @@ export default function Dashboard() {
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* P&L Trend Chart */}
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
               <h2 className="text-xl font-bold text-gray-900 mb-4">Profit & Loss Trend (7 Days)</h2>
               <ResponsiveContainer width="100%" height={250}>
                 <LineChart data={profitHistory}>
@@ -321,7 +321,7 @@ export default function Dashboard() {
             </div>
 
             {/* Portfolio Performance Chart */}
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
               <h2 className="text-xl font-bold text-gray-900 mb-4">Portfolio Performance</h2>
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={monthlyData}>
@@ -341,7 +341,7 @@ export default function Dashboard() {
             </div>
 
             {/* Asset Performance */}
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
               <h2 className="text-xl font-bold text-gray-900 mb-4">Asset Performance</h2>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={performanceData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
@@ -401,7 +401,7 @@ export default function Dashboard() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Portfolio Distribution */}
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
               <h2 className="text-xl font-bold text-gray-900 mb-4">Portfolio Distribution</h2>
               {pieChartData.length > 0 ? (
                 <>
@@ -446,7 +446,7 @@ export default function Dashboard() {
             </div>
 
             {/* Recent Investments */}
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
               <h2 className="text-xl font-bold text-gray-900 mb-4">Your Investments</h2>
               {investments.length > 0 ? (
                 <div className="space-y-3">

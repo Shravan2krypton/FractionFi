@@ -11,7 +11,7 @@ export default function Home() {
   const { user } = useAuth();
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:from-gray-900 dark:to-gray-800 dark:bg-gradient-to-br">
       <Navigation />
       
       {/* Hero Section */}
@@ -59,10 +59,10 @@ export default function Home() {
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">
               Why Choose FractionFi?
             </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
               Democratizing investment opportunities through blockchain technology
             </p>
           </div>
@@ -72,8 +72,8 @@ export default function Home() {
               <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
                 <Shield className="h-8 w-8 text-blue-600" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Secure & Transparent</h3>
-              <p className="text-gray-600">
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">Secure & Transparent</h3>
+              <p className="text-gray-600 dark:text-gray-300">
                 All transactions recorded on blockchain with complete transparency and immutable records.
               </p>
             </div>
@@ -82,8 +82,8 @@ export default function Home() {
               <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
                 <Users className="h-8 w-8 text-green-600" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Low Barrier Entry</h3>
-              <p className="text-gray-600">
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">Low Barrier Entry</h3>
+              <p className="text-gray-600 dark:text-gray-300">
                 Start investing with minimal amounts. No minimum investment requirements.
               </p>
             </div>
@@ -92,8 +92,8 @@ export default function Home() {
               <div className="inline-flex items-center justify-center w-16 h-16 bg-purple-100 rounded-full mb-4">
                 <BarChart3 className="h-8 w-8 text-purple-600" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Real-time Tracking</h3>
-              <p className="text-gray-600">
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">Real-time Tracking</h3>
+              <p className="text-gray-600 dark:text-gray-300">
                 Monitor your portfolio performance and asset values in real-time.
               </p>
             </div>
@@ -102,26 +102,26 @@ export default function Home() {
       </section>
 
       {/* Asset Types Section */}
-      <section className="py-20 bg-gray-50">
+      <section className="py-20 bg-gray-50 dark:bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">
               Invest in What Matters
             </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
               Choose from carefully curated high-value assets
             </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
               <div className="p-8">
                 <Building className="h-12 w-12 text-blue-600 mb-4" />
-                <h3 className="text-2xl font-bold text-gray-900 mb-3">Real Estate</h3>
-                <p className="text-gray-600 mb-4">
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-3">Real Estate</h3>
+                <p className="text-gray-600 dark:text-gray-300 mb-4">
                   Invest in premium commercial and residential properties across major cities.
                 </p>
-                <ul className="text-sm text-gray-600 space-y-2">
+                <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-2">
                   <li>• Rental income distribution</li>
                   <li>• Property appreciation</li>
                   <li>• Professional management</li>
@@ -129,14 +129,14 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
               <div className="p-8">
                 <Coins className="h-12 w-12 text-yellow-600 mb-4" />
-                <h3 className="text-2xl font-bold text-gray-900 mb-3">Gold Reserves</h3>
-                <p className="text-gray-600 mb-4">
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-3">Gold Reserves</h3>
+                <p className="text-gray-600 dark:text-gray-300 mb-4">
                   Own fractions of securely stored physical gold with guaranteed authenticity.
                 </p>
-                <ul className="text-sm text-gray-600 space-y-2">
+                <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-2">
                   <li>• Inflation hedge</li>
                   <li>• Secure vault storage</li>
                   <li>• Easy liquidity</li>
@@ -144,14 +144,14 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
               <div className="p-8">
                 <Rocket className="h-12 w-12 text-purple-600 mb-4" />
-                <h3 className="text-2xl font-bold text-gray-900 mb-3">Startups</h3>
-                <p className="text-gray-600 mb-4">
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-3">Startups</h3>
+                <p className="text-gray-600 dark:text-gray-300 mb-4">
                   Back innovative early-stage companies with high growth potential.
                 </p>
-                <ul className="text-sm text-gray-600 space-y-2">
+                <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-2">
                   <li>• High growth potential</li>
                   <li>• Diversified portfolio</li>
                   <li>• Exit opportunities</li>
@@ -166,10 +166,10 @@ export default function Home() {
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">
               How FractionFi Works
             </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
               Start your investment journey in 4 simple steps
             </p>
           </div>
@@ -179,8 +179,8 @@ export default function Home() {
               <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 text-white rounded-full text-2xl font-bold mb-4">
                 1
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Sign Up</h3>
-              <p className="text-gray-600 text-sm">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Sign Up</h3>
+              <p className="text-gray-600 dark:text-gray-300 text-sm">
                 Create your account and complete KYC verification
               </p>
             </div>
@@ -189,8 +189,8 @@ export default function Home() {
               <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 text-white rounded-full text-2xl font-bold mb-4">
                 2
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Connect Wallet</h3>
-              <p className="text-gray-600 text-sm">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Connect Wallet</h3>
+              <p className="text-gray-600 dark:text-gray-300 text-sm">
                 Link your MetaMask wallet for secure transactions
               </p>
             </div>
@@ -199,8 +199,8 @@ export default function Home() {
               <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 text-white rounded-full text-2xl font-bold mb-4">
                 3
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Buy Tokens</h3>
-              <p className="text-gray-600 text-sm">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Buy Tokens</h3>
+              <p className="text-gray-600 dark:text-gray-300 text-sm">
                 Purchase fractional tokens of your chosen assets
               </p>
             </div>
@@ -209,8 +209,8 @@ export default function Home() {
               <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 text-white rounded-full text-2xl font-bold mb-4">
                 4
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Earn Returns</h3>
-              <p className="text-gray-600 text-sm">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Earn Returns</h3>
+              <p className="text-gray-600 dark:text-gray-300 text-sm">
                 Receive rental income and profit distributions
               </p>
             </div>

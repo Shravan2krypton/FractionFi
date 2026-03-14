@@ -226,12 +226,12 @@ export default function AssetDetails() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 dark:from-gray-900 dark:to-gray-800 dark:bg-gradient-to-br">
         <Navigation />
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading asset details...</p>
+            <p className="text-gray-600 dark:text-gray-300">Loading asset details...</p>
           </div>
         </div>
       </div>
@@ -240,7 +240,7 @@ export default function AssetDetails() {
 
   if (error || !asset) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 dark:from-gray-900 dark:to-gray-800 dark:bg-gradient-to-br">
         <Navigation />
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
@@ -260,15 +260,15 @@ export default function AssetDetails() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:from-gray-900 dark:to-gray-800 dark:bg-gradient-to-br">
       <Navigation />
       
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
+      <div className="bg-white dark:bg-gray-800 shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <button
             onClick={() => router.back()}
-            className="flex items-center text-gray-600 hover:text-gray-900 mb-4"
+            className="flex items-center text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 mb-4"
           >
             <ArrowLeft className="h-5 w-5 mr-2" />
             Back to Marketplace
@@ -284,7 +284,7 @@ export default function AssetDetails() {
                 {getAssetIcon(asset.asset_type)}
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">{asset.name}</h1>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">{asset.name}</h1>
                 <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium mt-2 ${
                   asset.asset_type === 'real_estate' ? 'bg-blue-100 text-blue-800' :
                   asset.asset_type === 'gold' ? 'bg-yellow-100 text-yellow-800' :
@@ -296,8 +296,8 @@ export default function AssetDetails() {
             </div>
             
             <div className="text-right">
-              <p className="text-sm text-gray-500">Token Price</p>
-              <p className="text-2xl font-bold text-gray-900">{formatCurrency(asset.token_price)}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Token Price</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{formatCurrency(asset.token_price)}</p>
             </div>
           </div>
         </div>
@@ -308,23 +308,23 @@ export default function AssetDetails() {
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Description */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">About this Asset</h2>
-              <p className="text-gray-600 leading-relaxed">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">About this Asset</h2>
+              <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
                 {asset.description || 'No description available for this asset.'}
               </p>
             </div>
 
             {/* Key Metrics */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Key Metrics</h2>
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Key Metrics</h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                 <div>
                   <div className="flex items-center mb-2">
                     <TrendingUp className="h-5 w-5 text-blue-600 mr-2" />
-                    <p className="text-sm text-gray-500">Total Value</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Total Value</p>
                   </div>
-                  <p className="text-lg font-semibold text-gray-900">
+                  <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                     {formatCurrency(asset.total_value)}
                   </p>
                 </div>
@@ -332,9 +332,9 @@ export default function AssetDetails() {
                 <div>
                   <div className="flex items-center mb-2">
                     <Users className="h-5 w-5 text-green-600 mr-2" />
-                    <p className="text-sm text-gray-500">Total Supply</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Total Supply</p>
                   </div>
-                  <p className="text-lg font-semibold text-gray-900">
+                  <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                     {asset.total_supply.toLocaleString()}
                   </p>
                 </div>
@@ -342,9 +342,9 @@ export default function AssetDetails() {
                 <div>
                   <div className="flex items-center mb-2">
                     <Shield className="h-5 w-5 text-purple-600 mr-2" />
-                    <p className="text-sm text-gray-500">Available</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Available</p>
                   </div>
-                  <p className="text-lg font-semibold text-gray-900">
+                  <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                     {asset.available_tokens.toLocaleString()}
                   </p>
                 </div>
@@ -352,7 +352,7 @@ export default function AssetDetails() {
                 <div>
                   <div className="flex items-center mb-2">
                     <Calculator className="h-5 w-5 text-orange-600 mr-2" />
-                    <p className="text-sm text-gray-500">Est. ROI</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Est. ROI</p>
                   </div>
                   <p className="text-lg font-semibold text-green-600">
                     {asset.roi_estimate ? `+${asset.roi_estimate}%` : 'N/A'}
@@ -362,12 +362,12 @@ export default function AssetDetails() {
             </div>
 
             {/* Progress */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Token Sale Progress</h2>
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Token Sale Progress</h2>
               <div className="space-y-3">
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Tokens Sold</span>
-                  <span className="font-medium text-gray-900">
+                  <span className="text-gray-600 dark:text-gray-300">Tokens Sold</span>
+                  <span className="font-medium text-gray-900 dark:text-gray-100">
                     {asset.total_supply - asset.available_tokens} / {asset.total_supply}
                   </span>
                 </div>
@@ -377,7 +377,7 @@ export default function AssetDetails() {
                     style={{ width: `${((asset.total_supply - asset.available_tokens) / asset.total_supply) * 100}%` }}
                   ></div>
                 </div>
-                <p className="text-sm text-gray-600 text-center">
+                <p className="text-sm text-gray-600 dark:text-gray-300 text-center">
                   {Math.round(((asset.total_supply - asset.available_tokens) / asset.total_supply) * 100)}% of tokens sold
                 </p>
               </div>
@@ -387,7 +387,7 @@ export default function AssetDetails() {
           {/* Purchase Panel */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-lg shadow p-6 sticky top-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Purchase Tokens</h2>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Purchase Tokens</h2>
               
               {!user && (
                 <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">

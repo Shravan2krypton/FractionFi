@@ -200,11 +200,11 @@ export const SearchInput: React.FC<SearchInputProps> = ({
           }}
           placeholder={placeholder}
           className={cn(
-            'w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg',
+            'w-full pl-10 pr-10 py-3 border border-gray-300 dark:border-gray-600 rounded-lg',
             'focus:ring-2 focus:ring-blue-500 focus:border-transparent',
             'transition-all duration-200',
-            'bg-white text-gray-900 placeholder-gray-500',
-            'hover:border-gray-400'
+            'bg-white dark:bg-black text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400',
+            'hover:border-gray-400 dark:hover:border-gray-500'
           )}
         />
         {value && (
@@ -214,7 +214,7 @@ export const SearchInput: React.FC<SearchInputProps> = ({
               setIsOpen(false);
               setHighlightedIndex(-1);
             }}
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
           >
             <X className="h-4 w-4" />
           </button>
@@ -224,16 +224,16 @@ export const SearchInput: React.FC<SearchInputProps> = ({
       {/* Suggestions Dropdown */}
       {isOpen && (
         <div className={cn(
-          'absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50',
+          'absolute top-full left-0 right-0 mt-1 bg-white dark:bg-black border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg z-50',
           'max-h-80 overflow-y-auto'
         )}>
           {/* Recent Searches Header */}
           {!value.trim() && recentSearches.length > 0 && (
-            <div className="px-4 py-2 border-b border-gray-100 flex items-center justify-between">
-              <span className="text-xs font-medium text-gray-500">Recent Searches</span>
+            <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+              <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Recent Searches</span>
               <button
                 onClick={clearRecentSearches}
-                className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+                className="text-xs text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
               >
                 Clear
               </button>
@@ -243,8 +243,8 @@ export const SearchInput: React.FC<SearchInputProps> = ({
           {/* Suggestions List */}
           <div className="py-1">
             {filteredSuggestions.length === 0 && value.trim() ? (
-              <div className="px-4 py-6 text-center text-gray-500">
-                <Search className="h-8 w-8 mx-auto mb-2 text-gray-300" />
+              <div className="px-4 py-6 text-center text-gray-500 dark:text-gray-400">
+                <Search className="h-8 w-8 mx-auto mb-2 text-gray-300 dark:text-gray-500" />
                 <p className="text-sm">No suggestions found</p>
               </div>
             ) : (
@@ -253,18 +253,18 @@ export const SearchInput: React.FC<SearchInputProps> = ({
                   key={suggestion.id}
                   onClick={() => handleSuggestionClick(suggestion)}
                   className={cn(
-                    'w-full px-4 py-3 flex items-center space-x-3 hover:bg-gray-50 transition-colors',
-                    'text-left border-b border-gray-50 last:border-b-0',
-                    highlightedIndex === index && 'bg-blue-50'
+                    'w-full px-4 py-3 flex items-center space-x-3 hover:bg-gray-50 dark:hover:bg-black transition-colors',
+                    'text-left border-b border-gray-50 dark:border-gray-700 last:border-b-0',
+                    highlightedIndex === index && 'bg-blue-50 dark:bg-blue-900/30'
                   )}
                 >
                   {getSuggestionIcon(suggestion)}
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium text-gray-900 truncate">
+                    <div className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
                       {suggestion.text}
                     </div>
                     {suggestion.category && (
-                      <div className="text-xs text-gray-500">
+                      <div className="text-xs text-gray-500 dark:text-gray-400">
                         {suggestion.category}
                       </div>
                     )}
@@ -286,10 +286,10 @@ export const SearchInput: React.FC<SearchInputProps> = ({
 
           {/* Search Hint */}
           {value.trim() && (
-            <div className="px-4 py-2 border-t border-gray-100 bg-gray-50">
-              <p className="text-xs text-gray-500">
-                Press <kbd className="px-1 py-0.5 bg-white border border-gray-300 rounded text-xs">Enter</kbd> to search, 
-                <kbd className="px-1 py-0.5 bg-white border border-gray-300 rounded text-xs ml-1">↑↓</kbd> to navigate
+            <div className="px-4 py-2 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Press <kbd className="px-1 py-0.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-xs">Enter</kbd> to search, 
+                <kbd className="px-1 py-0.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-xs ml-1">↑↓</kbd> to navigate
               </p>
             </div>
           )}

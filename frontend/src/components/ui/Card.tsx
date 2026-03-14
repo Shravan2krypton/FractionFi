@@ -38,8 +38,8 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
         hover && 'hover:shadow-2xl hover:-translate-y-1'
       ],
       glass: [
-        'bg-white/80 backdrop-blur-xl border border-white/20',
-        hover && 'hover:bg-white/90 hover:shadow-2xl'
+        'bg-white dark:bg-black backdrop-blur-xl border border-white/20 dark:border-gray-800',
+        hover && 'hover:bg-white/90 dark:hover:bg-black hover:shadow-2xl'
       ],
     };
 

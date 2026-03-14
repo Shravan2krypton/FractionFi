@@ -132,6 +132,32 @@ export default function Transactions() {
     setFilteredTransactions(filtered);
   };
 
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case 'purchase':
+        return <TrendingUp className="h-4 w-4 text-green-600" />;
+      case 'sale':
+        return <TrendingDown className="h-4 w-4 text-red-600" />;
+      case 'profit_distribution':
+        return <Wallet className="h-4 w-4 text-blue-600" />;
+      default:
+        return null;
+    }
+  };
+
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case 'purchase':
+        return 'bg-green-100 text-green-800';
+      case 'sale':
+        return 'bg-red-100 text-red-800';
+      case 'profit_distribution':
+        return 'bg-blue-100 text-blue-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
   // Generate search suggestions
   const searchSuggestions = useMemo(() => {
     const uniqueAssets = [...new Map(transactions.map(tx => [tx.asset_name, tx])).values()];
@@ -239,32 +265,6 @@ export default function Transactions() {
     }
   };
 
-  const getTypeIcon = (type: string) => {
-    switch (type) {
-      case 'purchase':
-        return <TrendingUp className="h-4 w-4 text-green-600" />;
-      case 'sale':
-        return <TrendingDown className="h-4 w-4 text-red-600" />;
-      case 'profit_distribution':
-        return <Wallet className="h-4 w-4 text-blue-600" />;
-      default:
-        return null;
-    }
-  };
-
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case 'purchase':
-        return 'bg-green-100 text-green-800';
-      case 'sale':
-        return 'bg-red-100 text-red-800';
-      case 'profit_distribution':
-        return 'bg-blue-100 text-blue-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
   const truncateHash = (hash?: string) => {
     if (!hash) return 'N/A';
     return `${hash.slice(0, 8)}...${hash.slice(-6)}`;
@@ -279,12 +279,12 @@ export default function Transactions() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 dark:from-gray-900 dark:to-gray-800 dark:bg-gradient-to-br">
         <Navigation />
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading transactions...</p>
+            <p className="text-gray-600 dark:text-gray-300">Loading transactions...</p>
           </div>
         </div>
       </div>
@@ -292,20 +292,20 @@ export default function Transactions() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:from-gray-900 dark:to-gray-800 dark:bg-gradient-to-br">
       <Navigation />
       
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
+      <div className="bg-white dark:bg-gray-800 shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <h1 className="text-3xl font-bold text-gray-900">Transaction History</h1>
-          <p className="text-gray-600 mt-2">View your investment transactions and profit distributions</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Transaction History</h1>
+          <p className="text-gray-600 dark:text-gray-300 mt-2">View your investment transactions and profit distributions</p>
         </div>
       </div>
 
       {/* Enhanced Search and Filters */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
           {/* Search Bar */}
           <div className="mb-6">
             <SearchInput
@@ -371,7 +371,7 @@ export default function Transactions() {
             </div>
 
             {/* Results Count */}
-            <div className="text-sm text-gray-600">
+            <div className="text-sm text-gray-600 dark:text-gray-300">
               Showing {filteredTransactions.length} of {transactions.length} transactions
             </div>
           </div>
@@ -394,25 +394,25 @@ export default function Transactions() {
           <div className="flex items-center space-x-4 text-sm pt-4 border-t border-gray-100">
             <div className="flex items-center">
               <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
-              <span className="text-black font-medium">Purchase</span>
+              <span className="text-gray-700 dark:text-gray-300 font-medium">Purchase</span>
             </div>
             <div className="flex items-center">
               <div className="w-3 h-3 bg-red-500 rounded-full mr-2"></div>
-              <span className="text-black font-medium">Sale</span>
+              <span className="text-gray-700 dark:text-gray-300 font-medium">Sale</span>
             </div>
             <div className="flex items-center">
               <div className="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
-              <span className="text-black font-medium">Profit</span>
+              <span className="text-gray-700 dark:text-gray-300 font-medium">Profit</span>
             </div>
           </div>
         </div>
 
         {/* Transactions List */}
         {filteredTransactions.length === 0 ? (
-          <div className="bg-white rounded-lg shadow p-12 text-center">
-            <Wallet className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No transactions found</h3>
-            <p className="text-gray-600">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-12 text-center">
+            <Wallet className="h-16 w-16 text-gray-300 dark:text-gray-500 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">No transactions found</h3>
+            <p className="text-gray-600 dark:text-gray-300">
               {searchTerm || filterType !== 'all' || filterStatus !== 'all' 
                 ? 'Try adjusting your filters or search terms'
                 : 'Your transaction history will appear here once you start investing'
@@ -420,12 +420,12 @@ export default function Transactions() {
             </p>
           </div>
         ) : (
-          <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead className="bg-gray-50 dark:bg-gray-700">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Date
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -448,16 +448,16 @@ export default function Transactions() {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                   {filteredTransactions.map((transaction) => (
-                    <tr key={transaction.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <tr key={transaction.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                         {formatDate(transaction.created_at)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div>
-                          <div className="text-sm font-medium text-gray-900">{transaction.asset_name}</div>
-                          <div className="text-xs text-gray-500">{transaction.asset_type.replace('_', ' ')}</div>
+                          <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{transaction.asset_name}</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">{transaction.asset_type.replace('_', ' ')}</div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -511,7 +511,7 @@ export default function Transactions() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center space-x-2">
-                          <span className="text-sm font-mono text-gray-900">
+                          <span className="text-sm font-mono text-gray-900 dark:text-gray-100">
                             {truncateHash(transaction.blockchain_tx_hash)}
                           </span>
                           {transaction.blockchain_tx_hash && (
